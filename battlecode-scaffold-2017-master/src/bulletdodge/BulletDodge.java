@@ -29,7 +29,7 @@ public strictfp class BulletDodge {
 	 * 
 	 * @return true if a bullet will hit the current robot location next round . false otherwise.
 	 */
-	public static boolean incoming(){
+	public static int[] incoming(){
 		return incoming(rc.getLocation());
 	}
 	/**
@@ -40,8 +40,8 @@ public strictfp class BulletDodge {
 	 * 
 	 * @return true if a bullet will hit the current robot location next round . false otherwise.
 	 */
-	public static boolean incoming(boolean scanfirst){
-		bullets = bulletScan(); //use scanbullets to integrate comms
+	public static int[] incoming(boolean scanfirst){
+		bulletScan(); //use scanbullets to integrate comms
 		return incoming();
 	}
 	/**
@@ -67,26 +67,41 @@ public strictfp class BulletDodge {
 	 * the bullet list.
 	 * 
 	 */
-	public static int[] incoming(MapLocation location){
+	public static int[] incoming(MapLocation myLocation){
 		float radius = rt.bodyRadius;
-		float distance;
-		float speed;
 		int[] danger = new int[5];
-		Direction dirToMe, bulletDir;
+		int dcount = 0;
 		BulletInfo bullet;
-		
+		Direction propagationDirection;
+        MapLocation bulletLocation;
+        Direction directionToRobot;
+        float distToRobot;
+        float theta;
 		for(int i = 0;i<bullets.length;i++){
+			// Get relevant bullet information
 			bullet = bullets[i];
 			if(bullet==null){break;}
-			dirToMe = Direction(bullet.location,location);
-			bulletDir = bullet.dir;
+	        propagationDirection = bullet.dir;
+	        bulletLocation = bullet.location;
+			
+			//calculate relative angles and such
+	        directionToRobot = bulletLocation.directionTo(myLocation);
+	        theta = propagationDirection.radiansBetween(directionToRobot);
+	        
+	        // If theta > 90 degrees, then the bullet is traveling away from us and we can break early
+	        if (Math.abs(theta) > Math.PI/2) {continue;}
+	        
+	        //calculate the prependicular distance to the robot from the line of the bullet
+	        //and append it to the danger list
+	        //if there's more than five, fuck it.
+	        distToRobot = bulletLocation.distanceTo(myLocation);
+	        if((float)Math.abs(distToRobot * Math.sin(theta))<=radius){
+	        	danger[dcount++] = i;
+	        	if(dcount >=5){break;}
+	        }
 			
 		}
-				
-		
-		
-		
-		return false;
+		return danger;
 	}
 	
 }
