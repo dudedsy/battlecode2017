@@ -4,7 +4,8 @@ import battlecode.common.*;
 
 /**
  * This class control functions related to bullet sensing and dodging.
- * A robot is no good to us dead, first movement priority is to dodge bullets and danger.
+ * A robot is no good to us dead, first movement priority is to dodge 
+ * bullets and danger.
  * 
  * Must set rc before use.
  */
@@ -17,6 +18,7 @@ public strictfp class BulletDodge {
 	 * Stores the sensor data on bullets to a local array.
 	 */
 	public static void bulletScan(){
+		//TODO: integrate comms
 		bullets = rc.senseNearbyBullets();
 	}
 	
@@ -39,20 +41,48 @@ public strictfp class BulletDodge {
 	 * @return true if a bullet will hit the current robot location next round . false otherwise.
 	 */
 	public static boolean incoming(boolean scanfirst){
-		bulletScan();
+		bullets = bulletScan(); //use scanbullets to integrate comms
 		return incoming();
 	}
 	/**
-	 * detects whether the location is in danger
-	 * assume the current bot's radius
+	 * detects whether the location is in danger 
+	 * bullet would hit bot at this location. 
+	 * assume the current bot's radius.
+	 * 
+	 * TODO: perhaps a function that calculates that 
+	 * we can't get out of the way of a particular bullet in time
+	 * and... suicides before getting killed?  Spends a bunch of compute processing
+	 * pending freeChannel or other messaging commands? Only for use when low on health.
+	 * 
+	 * Perhaps tries to decide whether that bullet has better liklihood of hitting
+	 * and enemy or a friend if it didn't hit him.
+	 * suicide to get out of it's way if it's gonna hit and enemy
+	 * take it if it'd hit a friend.
+	 * That's only if it's strong enough to kill the bot though...
+	 * If it's an archon it should try to make one last gardener before dying.
 	 * 
 	 * @param location - the location to check
 	 * 
+	 * @return list of the bullets headed here, as indexes for
+	 * the bullet list.
+	 * 
 	 */
-	public static boolean incoming(MapLocation location){
-		float x = location.x;
-		float y = location.y;
+	public static int[] incoming(MapLocation location){
 		float radius = rt.bodyRadius;
+		float distance;
+		float speed;
+		int[] danger = new int[5];
+		Direction dirToMe, bulletDir;
+		BulletInfo bullet;
+		
+		for(int i = 0;i<bullets.length;i++){
+			bullet = bullets[i];
+			if(bullet==null){break;}
+			dirToMe = Direction(bullet.location,location);
+			bulletDir = bullet.dir;
+			
+		}
+				
 		
 		
 		
