@@ -46,10 +46,10 @@ public strictfp class Communications {
 	 * Defines the useage for the various communication channels.
 	 * 1000 channels available. 
 	 * Channels are assigned in chunks of ten.
-	 * the first MIN_DYNAMIC_POINTER-10 chunks are reserved for fixed channels
-	 * the first few of any type, any team, and other globals.
+	 * the first MIN_DYNAMIC_POINTER-10 channels are reserved for fixed channels
+	 * fixed channels store the first few of any type, any team, and other globals.
 	 * 
-	 *  
+	 * dynamic channel allocation is used for extending object lists
 	 * 
 	 * @author brian
 	 *

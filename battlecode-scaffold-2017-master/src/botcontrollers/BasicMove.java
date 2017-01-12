@@ -2,7 +2,7 @@ package botcontrollers;
 
 import battlecode.common.*;
 
-public class BasicMove {
+public strictfp class BasicMove {
 	public static RobotController rc;
 	public static RobotType rt;
 	public static float bodyRadius;
@@ -17,7 +17,7 @@ public class BasicMove {
 	
 	/**
 	 * 
-	 * tries to move a certain direction
+	 * tries to move approximately certain direction
 	 * at full stride
 	 * true if it has moved.
 	 * false if it decided it couldn't move.

@@ -1,6 +1,7 @@
 package botcontrollers;
 import battlecode.common.*;
 import communications.Communications;
+import communications.FastBotInfo;
 
 public strictfp class RobotPlayer {
     public static RobotController rc;
@@ -19,6 +20,7 @@ public strictfp class RobotPlayer {
         try{
 			BasicMove.init(rc);
 			Communications.init(rc);
+			FastBotInfo.init(rc);
 		}catch(Exception e){
 			System.out.println(e);
 			e.printStackTrace();
