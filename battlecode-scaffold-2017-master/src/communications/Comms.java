@@ -41,91 +41,93 @@ import battlecode.common.*;
  * @author brian
  *
  */
-public strictfp class Communications {
-	/**
-	 * Defines the useage for the various communication channels.
-	 * 1000 channels available. 
-	 * Channels are assigned in chunks of ten.
-	 * the first MIN_DYNAMIC_POINTER-10 channels are reserved for fixed channels
-	 * fixed channels store the first few of any type, any team, and other globals.
-	 * 
-	 * dynamic channel allocation is used for extending object lists
-	 * 
-	 * @author brian
-	 *
-	 */
-	public static class CHANNELS{
-		
-		//pointers to the first byte in a chunk of fixed memory.
-		public static final int STACKDATA = 0;
-		public static final int ENEMY_ARCHONS = 10;
-		public static final int ENEMY_GARDENERS = 20;
-		public static final int ENEMY_TANKS = 30;
-		public static final int ENEMY_SPIES = 40;
-		public static final int ENEMY_LUMBERJACKS = 50;
-		public static final int ENEMY_SOLDIERS = 60;
-		public static final int ENEMY_TREES = 70;
-		
-		public static final int EMPTY_NEUTRAL_TREES = 100;
-		public static final int TREES_WITH_ROBOTS = 110;
-		public static final int TREES_WITH_BULLETS = 120;
-		
-		public static final int MY_TREES = 200;
-		public static final int MY_ARCHONS = 210;
-		public static final int MY_GARDENERS = 220;
-		public static final int MY_SOLDIERS = 230;
-		public static final int MY_SPIES = 240;
-		public static final int MY_TANKS = 250;
-		public static final int MY_LUMBERJACKS = 260;
-		
-		//dynamic allocation constants
-		public static final int FIXED_CHUNK_SIZE = 10;
-		public static final int DYNAMIC_CHUNK_SIZE = 10;
-		public static final int MIN_DYNAMIC_POINTER = 300;
-		
-	}
-	public static class LocTime{
-		public final int roundNumber;
-		public final MapLocation location;
-		
-		public LocTime(int roundNumber, MapLocation location){
-			this.roundNumber = roundNumber;
-			this.location = location;
-		}
-	}
+public strictfp class Comms {
+	//Constants
+	//pointers to the first byte in a chunk of fixed memory.
+	public static final int STACKPTR = 0; //one int for the dynamic channel stack head pointer
+	public static final int CORNERS = 1; //two channels for the corners/edges. x1,y1,x2,y2 
+	public static final int ENEMY_ARCHONS = 10;
+	public static final int ENEMY_GARDENERS = 20;
+	public static final int ENEMY_TANKS = 30;
+	public static final int ENEMY_SPIES = 40;
+	public static final int ENEMY_LUMBERJACKS = 50;
+	public static final int ENEMY_SOLDIERS = 60;
+	public static final int ENEMY_TREES = 70;
 	
+	public static final int EMPTY_NEUTRAL_TREES = 100;
+	public static final int TREES_WITH_ROBOTS = 110;
+	public static final int TREES_WITH_BULLETS = 120;
+	
+	public static final int MY_TREES = 200;
+	public static final int MY_ARCHONS = 210;
+	public static final int MY_GARDENERS = 220;
+	public static final int MY_SOLDIERS = 230;
+	public static final int MY_SPIES = 240;
+	public static final int MY_TANKS = 250;
+	public static final int MY_LUMBERJACKS = 260;
+	
+	//dynamic allocation constants
+	public static final int CHUNKSIZE = 20;
+	public static final int MIN_DYNAMIC_POINTER = 300;
+	
+	//initialize
 	public static RobotController rc;
-	
 	public static void init(RobotController robc){
 		rc = robc;
 	}
 	
-	public static int packLocation(MapLocation location){
-		//coordinates vary from 0-600, as floats. (maps 30x30 to 100x100 and offsets 0-500
-		//we can store x rounded to an int in the first 650
-		//then y rounded to an int in the next 650
-		return (int)(location.x+.5) + ((int)(location.y+.5))*650;
+	public static int listLength(int channel) throws GameActionException{
+		return rc.readBroadcast(channel);
 	}
-	public static MapLocation unpackLocation(int packed){
-		//inverse of the packing operation.
-		return new MapLocation((float)packed%650,(float)((packed%422500)/650));
+	public static boolean listAdd(int channel, Packable item) throws GameActionException{
+		return listAdd(channel,item.pack());
+	}
+	public static boolean listAdd(int channel, int[] packedItem) throws GameActionException{
+		return listAdd(channel,packedItem,listLength(channel));
+	}
+	public static boolean listAdd(int channel, int[] packedItem, int prevLength) throws GameActionException{
+		int itemLength = packedItem.length;
+		int start = prevLength*itemLength + 1;
+		int ptrloc;
+		rc.broadcast(channel, ++prevLength);
+		while(start >= CHUNKSIZE-1){
+			ptrloc = channel+CHUNKSIZE-1;
+			channel = rc.readBroadcast(ptrloc);
+			if(channel == 0){
+				channel = allocateChunk(ptrloc);
+				if(channel == 0){return false;}	
+			}
+			start -= CHUNKSIZE-2;
+		}
+		for(int i = 0; i < itemLength; i++){
+			rc.broadcast(channel+i+1, packedItem[i]);
+		}
+		return true;
 	}
 	/**
-	 * store x in the first 651
-	 * then y will be stored * 651, so 423801 is the top of y
-	 * 423801 * 3000 is only ~1.3 billion so it all just fits.
+	 * get the ith packed item from the list starting at channel
 	 * 
-	 * 
-	 * @param location
-	 * @param roundNumber
-	 * @return integer encoding of roundNumber and location
+	 * @param channel - the starting point of the list (in fixed memory)
+	 * @param itemLength - the length of the packed items in the list.
+	 * @return the packed item!
 	 */
-	public static int packTimeLoc(MapLocation location, int roundNumber){
-		return (int)(roundNumber)*423801 + packLocation(location);
+	public static int[] getPackedItem(int channel, int index, int itemLength) 
+			throws GameActionException, IndexOutOfBoundsException{
+		
+		int[] packedItem = new int[itemLength];
+		int start = index*itemLength + 1;
+		while(start >= CHUNKSIZE-1){
+			channel = rc.readBroadcast(channel+CHUNKSIZE-1);
+			if(channel == 0){throw new IndexOutOfBoundsException("Didn't find the expected pointer!");}
+			start -= CHUNKSIZE-2;
+		}
+		for(int i = 0; i < itemLength; i++){
+			packedItem[i]=rc.readBroadcast(channel+i+1);
+		}
+		
+		return packedItem;
 	}
-	public static LocTime unPackTimeLoc(int packed){
-		return new LocTime(packed/423801, unpackLocation(packed));
-	}
+	
 	/**
 	 * Allocates a chunk on the dynamic memory stack.
 	 * chunks must have a parent pointer associated. The parent
@@ -143,10 +145,10 @@ public strictfp class Communications {
 	 * @return pointer to new chunk, or 0 for null (no memory available)
 	 */
 	public static int allocateChunk(int parent) throws GameActionException{
-		int stackptr = rc.readBroadcast(CHANNELS.STACKDATA);
-		stackptr -= CHANNELS.DYNAMIC_CHUNK_SIZE;
-		if (stackptr<CHANNELS.MIN_DYNAMIC_POINTER){return 0;}
-		rc.broadcast(CHANNELS.STACKDATA,stackptr);
+		int stackptr = rc.readBroadcast(STACKPTR);
+		stackptr -= CHUNKSIZE;
+		if (stackptr<MIN_DYNAMIC_POINTER){return 0;}
+		rc.broadcast(STACKPTR,stackptr);
 		rc.broadcast(parent, stackptr);
 		rc.broadcast(stackptr, parent);
 		return stackptr;
@@ -173,42 +175,54 @@ public strictfp class Communications {
 	 */
 	public static void freeChunk(int ptr) throws GameActionException{
 		int parent = rc.readBroadcast(ptr); 
-		int stackptr = rc.readBroadcast(CHANNELS.STACKDATA);
+		int stackptr = rc.readBroadcast(STACKPTR);
 		rc.broadcast(parent, 0); //null the parent reference
 		if(ptr != stackptr){ //if we're deleting something other than the head of the stack
 			//we have to copy the head of the stack into it's place
 			//and tell the copied chunk's parent the new location
 			int topParent = rc.readBroadcast(stackptr);
 			rc.broadcast(topParent, ptr);
-			for(int i = 0; i < CHANNELS.DYNAMIC_CHUNK_SIZE; i++){
+			for(int i = 0; i < CHUNKSIZE; i++){
 				rc.broadcast(ptr+i, rc.readBroadcast(stackptr+i));
 			}
 		}
 		//then we can just move the stack pointer
-		stackptr += CHANNELS.DYNAMIC_CHUNK_SIZE;
-		rc.broadcast(CHANNELS.STACKDATA, stackptr);
+		stackptr += CHUNKSIZE;
+		rc.broadcast(STACKPTR, stackptr);
 			
 	}
 	
+	/**
+	 * Frees the chunk at ptr, as well as any children chunks (and their children, etc)
+	 * 
+	 * See freeChunk for warnings and caveats.
+	 * 
+	 * This doesn't risk leaving children hanging,
+	 * but it does risk fucking a lot of shit up if it encounters a corrupted chunk.
+	 * 
+	 * @param ptr
+	 * @throws GameActionException
+	 */
 	public static void freeChunkAndChildren(int ptr) throws GameActionException{
-		int child = rc.readBroadcast(ptr+CHANNELS.DYNAMIC_CHUNK_SIZE-1);
+		int child = rc.readBroadcast(ptr+CHUNKSIZE-1);
 		int parent=ptr;
-		int stackptr = rc.readBroadcast(CHANNELS.STACKDATA);
+		int stackptr = rc.readBroadcast(STACKPTR);
+		int stackParent;
 		while (child != 0){
 			parent = child;
-			child = rc.readBroadcast(parent+CHANNELS.DYNAMIC_CHUNK_SIZE-1);
+			child = rc.readBroadcast(parent+CHUNKSIZE-1);
 		}
 		while(parent != ptr){
 			child = parent;
 			parent = rc.readBroadcast(child);
 			if(child != stackptr){
-				int stackParent = rc.readBroadcast(stackptr);
+				stackParent = rc.readBroadcast(stackptr);
 				rc.broadcast(stackParent, child);
-				for(int i = 0; i < CHANNELS.DYNAMIC_CHUNK_SIZE; i++){
+				for(int i = 0; i < CHUNKSIZE; i++){
 					rc.broadcast(child+i, rc.readBroadcast(stackptr+i));
 				}
 			}
-			stackptr += CHANNELS.DYNAMIC_CHUNK_SIZE;
+			stackptr += CHUNKSIZE;
 		}
 		freeChunk(ptr);
 	}

@@ -15,8 +15,7 @@ public interface Packable{
 	 * packs the object into some small number of ints
 	 * @return packed form as a list of ints
 	 */
-	public int[] pack();
-	
+	public int[] pack();	
 	/**
 	 * unpacks the given int into this object. Error or bad data
 	 * if the int was not a packed form of the calling object type.

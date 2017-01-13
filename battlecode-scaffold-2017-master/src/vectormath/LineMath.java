@@ -1,4 +1,4 @@
-package euclidianvector;
+package vectormath;
 import java.lang.Math;
 import battlecode.common.*;
 
@@ -38,10 +38,10 @@ public class LineMath{
 		return startToLoc.length*(float)Math.sin(B.dir.radiansBetween(startToLoc.dir));
 	}
 	static final float perpDist(MapLocation loc, Vector B, MapLocation start){
-		B = new unitVector(B);
+		B = new UnitVector(B);
 		return perpDist(loc,B,start);
 	}
-	static final float perpDist(MapLocation loc, unitVector B, MapLocation start){
+	static final float perpDist(MapLocation loc, UnitVector B, MapLocation start){
 		return B.dy*(loc.x-start.x)-B.dx*(loc.y-start.y);
 	}
 	
@@ -90,17 +90,17 @@ public class LineMath{
 			this.dy = dy;
 		}
 	}
-	public static class unitVector extends Vector{
-		public unitVector(Line A){
+	public static class UnitVector extends Vector{
+		public UnitVector(Line A){
 			super((A.finish.x-A.start.x)/A.length,
 					(A.finish.y-A.start.y)/A.length);
 		}
-		public unitVector(Vector A){
+		public UnitVector(Vector A){
 			float length = (float)Math.sqrt(A.dx*A.dx+A.dy*A.dy);
 			dx = A.dx/length;
 			dy = A.dy/length;
 		}
-		public unitVector(float dx, float dy){
+		public UnitVector(float dx, float dy){
 			Direction dir = new Direction(dx,dy);
 			this.dx = dir.getDeltaX(1);
 			this.dy = dir.getDeltaY(1);
