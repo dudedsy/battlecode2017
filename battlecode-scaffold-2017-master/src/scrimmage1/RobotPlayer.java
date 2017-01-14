@@ -19,7 +19,7 @@ public strictfp class RobotPlayer {
         
       //Code here runs once. Initialize various objects.
         try{
-			BasicMove.init(rc);
+			Move.init(rc);
 			Comms.init(rc);
 			BulletDodge.init(rc);
 		}catch(Exception e){

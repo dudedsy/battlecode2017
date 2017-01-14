@@ -3,7 +3,7 @@ package botcontrollers;
 import battlecode.common.*;
 import communications.Comms;
 import communications.FastBotInfo;
-import movement.BasicMove;
+import movement.Move;
 
 public class Archon{
 	private static RobotController rc;

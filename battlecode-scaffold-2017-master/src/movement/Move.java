@@ -2,17 +2,17 @@ package movement;
 
 import battlecode.common.*;
 
-public strictfp class BasicMove {
+public strictfp class Move {
 	public static RobotController rc;
 	public static RobotType rt;
 	public static float bodyRadius;
 	public static float strideRadius;
 	
 	public static void init(RobotController rc){
-		BasicMove.rc = rc;
-		BasicMove.rt = rc.getType();
-		BasicMove.bodyRadius = rt.bodyRadius;
-		BasicMove.strideRadius = rt.strideRadius;
+		Move.rc = rc;
+		Move.rt = rc.getType();
+		Move.bodyRadius = rt.bodyRadius;
+		Move.strideRadius = rt.strideRadius;
 	}
 	
 	/**
