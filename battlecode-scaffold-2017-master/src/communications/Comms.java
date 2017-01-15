@@ -45,7 +45,8 @@ public strictfp class Comms {
 	//Constants
 	//pointers to the first byte in a chunk of fixed memory.
 	public static final int STACKPTR = 0; //one int for the dynamic channel stack head pointer
-	public static final int CORNERS = 1; //two channels for the corners/edges. x1,y1,x2,y2 
+	public static final int CORNERS = 1; //two channels for the corners/edges. x1,y1,x2,y2
+	public static final int LASTBUILT = 3;
 	public static final int ENEMY_ARCHONS = 20;
 	public static final int ENEMY_GARDENERS = 40;
 	public static final int ENEMY_TANKS = 60;

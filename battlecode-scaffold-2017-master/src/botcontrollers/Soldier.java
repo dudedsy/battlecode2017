@@ -1,12 +1,13 @@
 package botcontrollers;
 
 import battlecode.common.RobotController;
+import movement.Move;
 
 public class Soldier {
 private static RobotController rc;
 	
 public static void run(RobotController rc){
-	Soldier.rc = rc;
+		Soldier.rc = rc;
 		try{//Code here runs once.
 			
 		}catch(Exception e){
@@ -15,7 +16,8 @@ public static void run(RobotController rc){
 		}
 		while(true){
 			try{//mainloop code here
-				
+				Move.tryMove(Move.randomDirection());
+				Donations.ifReady();
 			}catch(Exception e){
 				System.out.println(e);
 				e.printStackTrace();

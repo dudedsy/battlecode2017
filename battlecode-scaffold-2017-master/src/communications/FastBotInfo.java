@@ -10,12 +10,19 @@ public class FastBotInfo implements Packable {
 	public RobotType rt;
 	public MapLocation loc;
 	
-	FastBotInfo(RobotInfo ri,int roundNum){
+	public FastBotInfo(RobotInfo ri,int roundNum){
 		health = ri.health;
 		round = roundNum;
 		ID = ri.ID;
 		loc = ri.location;
 		rt = ri.type;
+	}
+	public FastBotInfo(RobotController rc){
+		health = rc.getHealth();
+		round = rc.getRoundNum();
+		ID = rc.getID();
+		loc = rc.getLocation();
+		rt = rc.getType();
 	}
 	FastBotInfo(int[] packedForm){
 		unpack(packedForm);

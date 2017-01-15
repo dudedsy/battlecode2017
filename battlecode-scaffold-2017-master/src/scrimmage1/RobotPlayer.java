@@ -23,6 +23,7 @@ public strictfp class RobotPlayer {
 			Move.init(rc);
 			Comms.init(rc);
 			BulletDodge.init(rc);
+			Donations.init(rc);
 		}catch(Exception e){
 			System.out.println(e);
 			e.printStackTrace();

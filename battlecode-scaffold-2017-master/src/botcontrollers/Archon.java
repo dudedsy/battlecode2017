@@ -42,6 +42,12 @@ public class Archon{
 			try{//mainloop code here
 				hireIfNeeded();
 				Move.tryMove(Move.randomDirection());
+				/*if(chief){
+					System.out.print("There are ");
+					System.out.print(Comms.listLength(Comms.MY_GARDENERS));
+					System.out.println(" friendly Gardeners");
+				}*/
+				Donations.ifReady();
 				Clock.yield();
 			}catch(Exception e){
 				System.out.println(e);
@@ -49,9 +55,8 @@ public class Archon{
 			}
 		}
 	}
-	
 	static boolean hireIfNeeded() throws GameActionException{
-		if(!rc.hasRobotBuildRequirements(RobotType.GARDENER)){return false;}
+		if(!rc.isBuildReady()||!rc.hasRobotBuildRequirements(RobotType.GARDENER)){return false;}
 		if(Comms.listLength(Comms.MY_GARDENERS)>5){return false;}
 		Direction buildDir = Move.randomDirection();
 		int smallTurn = 0;
