@@ -16,11 +16,11 @@ public class LineMath{
 	 * 
 	 * @return A dot B
 	 */
-	static final float dot(Line A, Line B){
+	public static final float dot(Line A, Line B){
 		return A.length*((float)Math.cos(A.dir.radiansBetween(B.dir)));
 	}
 	
-	static final float dot(Vector A, Vector B){
+	public static final float dot(Vector A, Vector B){
 		return A.dx*B.dx+A.dy*B.dy;
 	}
 	
@@ -46,9 +46,9 @@ public class LineMath{
 	}
 	
 	public static class Line{
-		float length;
-		Direction dir;
-		MapLocation start,finish;
+		public float length;
+		public Direction dir;
+		public MapLocation start,finish;
 		
 		public Line(float length, Direction direction){
 			this.start = new MapLocation(0,0);
@@ -76,21 +76,35 @@ public class LineMath{
 		}
 	}
 	public static class Vector {
-		float dx,dy;
+		public float dx,dy;
 		
 		Vector(){}
 		
-		Vector(Line A){
+		public Vector(Line A){
 			if(A.finish == null){}
 			dx = (A.finish.x-A.start.x)/A.length;
 			dy = (A.finish.y-A.start.y)/A.length;	
 		}
-		Vector(float dx, float dy){
+		public Vector(float dx, float dy){
 			this.dx = dx;
 			this.dy = dy;
 		}
+		public Vector(MapLocation start, MapLocation finish){
+			dx = finish.x-start.x;
+			dy = finish.y-start.y;
+		}
+		public Vector scalarMult(float scalar){
+			return new Vector(this.dx*scalar,this.dy*scalar);
+		}
 	}
 	public static class UnitVector extends Vector{
+		public static UnitVector perpUnit(UnitVector v){
+			UnitVector retval = new UnitVector();
+			retval.dx = v.dy;
+			retval.dy = -v.dx;
+			return retval;
+		}
+		
 		public UnitVector(Line A){
 			super((A.finish.x-A.start.x)/A.length,
 					(A.finish.y-A.start.y)/A.length);
@@ -104,6 +118,12 @@ public class LineMath{
 			Direction dir = new Direction(dx,dy);
 			this.dx = dir.getDeltaX(1);
 			this.dy = dir.getDeltaY(1);
+		}
+		public UnitVector(Direction dir){
+			dx = dir.getDeltaX(1);
+			dy = dir.getDeltaY(1);
+		}
+		private UnitVector(){
 		}
 	}
 }

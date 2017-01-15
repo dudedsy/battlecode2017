@@ -13,6 +13,7 @@ public class Archon{
 	
 
 	public static void run(RobotController rc){
+		System.out.println("I'm an Archon!");
 		Archon.rc = rc;
 		int nArchons;
 		boolean chief = false;
@@ -30,7 +31,7 @@ public class Archon{
 				System.out.println("I'm first officer!");
 				break;
 			default:
-				System.out.println("I'm just an Archon.");
+				System.out.println("I'm the third Archon...");
 			}
 			Comms.listAdd(Comms.MY_ARCHONS,myPackedInfo,nArchons);
 		}catch(Exception e){
@@ -39,12 +40,26 @@ public class Archon{
 		}
 		while(true){
 			try{//mainloop code here
-				
+				hireIfNeeded();
+				Move.tryMove(Move.randomDirection());
 				Clock.yield();
 			}catch(Exception e){
 				System.out.println(e);
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	static boolean hireIfNeeded() throws GameActionException{
+		if(!rc.hasRobotBuildRequirements(RobotType.GARDENER)){return false;}
+		if(Comms.listLength(Comms.MY_GARDENERS)>5){return false;}
+		Direction buildDir = Move.randomDirection();
+		int smallTurn = 0;
+		while(!rc.canBuildRobot(RobotType.GARDENER, buildDir.rotateLeftDegrees(smallTurn))){
+			smallTurn += 10;
+			if(smallTurn == 360){return false;}
+		}
+		rc.hireGardener(buildDir.rotateLeftDegrees(smallTurn));
+		return true;
 	}
 }

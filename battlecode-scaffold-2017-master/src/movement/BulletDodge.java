@@ -80,53 +80,35 @@ public strictfp class BulletDodge {
 	 */
 	
 	public static BulletPath[] incoming(MapLocation myLocation){
-		
-		BulletPath[] danger = new BulletPath[10];
+		BulletPath[] danger = new BulletPath[MAXBULLETPATHS];
 		int dcount = 0;
 		BulletInfo bullet;
-		Direction propagationDirection;
-        MapLocation bulletLocation;
-        Direction directionToRobot;
-        float distToRobot;
-        MapLocation finish;
-        float theta;
-        float bulletSpeed;
-        float robotToFinish;
+
+        float safeRadius = rt.bodyRadius+rt.strideRadius;
+        BulletPath bulletPath;
+        LineMath.Vector startToRobot,finishToRobot;
+        
 		for(int i = 0;i<bullets.length;i++){
 			// Get relevant bullet information
 			bullet = bullets[i];
 			if(bullet==null){break;}
-	        propagationDirection = bullet.dir;
-	        bulletLocation = bullet.location;
-	        bulletSpeed = bullet.speed;
-			
-			//calculate relative angles and such
-	        directionToRobot = bulletLocation.directionTo(myLocation);
-	        theta = propagationDirection.radiansBetween(directionToRobot);
-	        
-	        // If theta > 90 degrees, then the bullet is traveling away from us, ignore it.
-	        if (Math.abs(theta) > Math.PI/2) {continue;}
-	        
-	        // Calulate distance and endpoint
-	        //TODO: account for trees, human shields even?  Trees dont move...
-	        distToRobot = bulletLocation.distanceTo(myLocation);
-	        finish = bulletLocation.add(propagationDirection,bulletSpeed);
-	        robotToFinish = finish.distanceTo(myLocation);
-	        
-	        //TODO: if the endpoint is far enough away, it can't hit us this turn. Ignore it.
-	        //TODO: (or if it's gonna hit a tree before getting in range)
-	        //TODO: or if we're far enough behind the start of the path
 
+			//calculate vectors
+	        startToRobot = new LineMath.Vector(bullet.location,myLocation);
+	        bulletPath = new BulletPath(bullet);
 	        
-	        //calculate the prependicular distance to the robot from the line of the bullet
-	        //and append it to the danger list
-	        //if there's more than MAXBULLETPATHS, fuck it.
-	        if((float)Math.abs(distToRobot * Math.sin(theta))<=bodyRadius){
-	        	//TODO: make this right...
-	        	danger[dcount++] = danger[i];
-	        	if(dcount >=5){break;}
-	        }
-			
+	        // If bullet doesn't pass close enough for us to get in danger, ignore it.
+	        bulletPath.perpDist = LineMath.dot(startToRobot,bulletPath.perpendicular);
+	        if(Math.abs(bulletPath.perpDist)>safeRadius){continue;}
+	        
+	        //TODO: account for start 
+	        //TODO: account for endpoint
+	        //TODO:account for trees?
+
+	        //if we made it this far, add it to the danger list
+	        //then iff we've filled the list we can just break out... fuck it
+	        danger[dcount++] = bulletPath;
+	        if(dcount>MAXBULLETPATHS){break;}
 		}
 		return danger;
 	}
@@ -146,9 +128,24 @@ public strictfp class BulletDodge {
 	 * 
 	 * parallel is the unit vector for that metric.
 	 */
-	public class BulletPath{
-		LineMath.UnitVector perpendicular, parallel;
-		MapLocation start,finish;
+	public static class BulletPath{
+		public LineMath.UnitVector perpendicular, parallel;
+		public MapLocation start,finish;
+		public float speed, damage;
+		public int ID;
+		public float perpDist;
+		public float endDist;
+		public float startDist;
+		
+		public BulletPath(BulletInfo bullet){
+			start = bullet.location;
+			parallel = new LineMath.UnitVector(bullet.dir);
+			perpendicular = LineMath.UnitVector.perpUnit(parallel);
+			finish = new MapLocation(start.x+bullet.speed*parallel.dx,start.y+bullet.speed*parallel.dy);
+			speed = bullet.speed;
+			damage = bullet.damage;
+			ID = bullet.ID;
+		}
 	}
 	
 }

@@ -12,6 +12,7 @@ public strictfp class RobotPlayer {
      * If this method returns, the robot dies!
     **/
     public static void run(RobotController rc) throws GameActionException {
+    	System.out.println("I'm alive!");
 
         // This is the RobotController object. You use it to perform actions from this robot,
         // and to get information on its current status.

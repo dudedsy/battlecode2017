@@ -46,29 +46,29 @@ public strictfp class Comms {
 	//pointers to the first byte in a chunk of fixed memory.
 	public static final int STACKPTR = 0; //one int for the dynamic channel stack head pointer
 	public static final int CORNERS = 1; //two channels for the corners/edges. x1,y1,x2,y2 
-	public static final int ENEMY_ARCHONS = 10;
-	public static final int ENEMY_GARDENERS = 20;
-	public static final int ENEMY_TANKS = 30;
-	public static final int ENEMY_SPIES = 40;
-	public static final int ENEMY_LUMBERJACKS = 50;
-	public static final int ENEMY_SOLDIERS = 60;
-	public static final int ENEMY_TREES = 70;
+	public static final int ENEMY_ARCHONS = 20;
+	public static final int ENEMY_GARDENERS = 40;
+	public static final int ENEMY_TANKS = 60;
+	public static final int ENEMY_SPIES = 80;
+	public static final int ENEMY_LUMBERJACKS = 100;
+	public static final int ENEMY_SOLDIERS = 120;
+	public static final int ENEMY_TREES = 140;
 	
-	public static final int EMPTY_NEUTRAL_TREES = 100;
-	public static final int TREES_WITH_ROBOTS = 110;
-	public static final int TREES_WITH_BULLETS = 120;
+	public static final int EMPTY_NEUTRAL_TREES = 160;
+	public static final int TREES_WITH_ROBOTS = 180;
+	public static final int TREES_WITH_BULLETS = 200;
 	
-	public static final int MY_TREES = 200;
-	public static final int MY_ARCHONS = 210;
-	public static final int MY_GARDENERS = 220;
-	public static final int MY_SOLDIERS = 230;
-	public static final int MY_SPIES = 240;
-	public static final int MY_TANKS = 250;
-	public static final int MY_LUMBERJACKS = 260;
+	public static final int MY_TREES = 220;
+	public static final int MY_ARCHONS = 240;
+	public static final int MY_GARDENERS = 260;
+	public static final int MY_SOLDIERS = 280;
+	public static final int MY_SPIES = 300;
+	public static final int MY_TANKS = 320;
+	public static final int MY_LUMBERJACKS = 340;
 	
 	//dynamic allocation constants
 	public static final int CHUNKSIZE = 20;
-	public static final int MIN_DYNAMIC_POINTER = 300;
+	public static final int MIN_DYNAMIC_POINTER = 360;
 	
 	//initialize
 	public static RobotController rc;
