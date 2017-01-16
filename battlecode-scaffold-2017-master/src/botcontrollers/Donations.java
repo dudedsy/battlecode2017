@@ -19,4 +19,10 @@ public class Donations {
 			return true;
 		}else{return false;}
 	}
+	public static boolean ifReady(float amt, float thresh) throws GameActionException{
+		if(rc.getTeamBullets()>thresh){
+			rc.donate(amt);
+			return true;
+		}else{return false;}
+	}
 }
