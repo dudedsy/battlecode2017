@@ -1,6 +1,7 @@
 package botcontrollers;
 
 import battlecode.common.RobotController;
+import movement.BulletDodge;
 import movement.Move;
 
 public class Soldier {
@@ -16,6 +17,7 @@ public static void run(RobotController rc){
 		}
 		while(true){
 			try{//mainloop code here
+				BulletDodge.dodge();
 				Move.tryMove(Move.randomDirection());
 				Donations.ifReady();
 			}catch(Exception e){

@@ -2,6 +2,7 @@ package botcontrollers;
 
 import battlecode.common.*;
 import communications.*;
+import movement.BulletDodge;
 import movement.Move;
 
 public class Gardener{
@@ -42,6 +43,7 @@ public class Gardener{
 					}
 				}
 				tryWater();
+				BulletDodge.dodge();
 				Move.tryMove(chooseDestination());
 				tryWater();
 				if(round%7==0){tryBuild();}

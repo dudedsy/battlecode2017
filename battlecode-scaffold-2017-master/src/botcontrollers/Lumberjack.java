@@ -1,5 +1,6 @@
 package botcontrollers;
 import battlecode.common.*;
+import movement.BulletDodge;
 import movement.Move;
 
 public class Lumberjack {
@@ -15,6 +16,7 @@ public class Lumberjack {
 		}
 		while(true){
 			try{//mainloop code here
+				BulletDodge.dodge();
 				Move.tryMove(Move.randomDirection());
 				Donations.ifReady();
 			}catch(Exception e){

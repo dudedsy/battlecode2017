@@ -3,7 +3,7 @@ package botcontrollers;
 import battlecode.common.*;
 import communications.Comms;
 import communications.FastBotInfo;
-import movement.Move;
+import movement.*;
 
 public class Archon{
 	private static RobotController rc;
@@ -41,6 +41,7 @@ public class Archon{
 		while(true){
 			try{//mainloop code here
 				hireIfNeeded();
+				BulletDodge.dodge();
 				Move.tryMove(Move.randomDirection());
 				/*if(chief){
 					System.out.print("There are ");
