@@ -40,7 +40,7 @@ public strictfp class Move {
 		return tryMove(vec.direction());
 	}
 	
-	static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
+	public static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {
 		if(rc.hasMoved()){return false;}
         // First, try intended direction
         if (rc.canMove(dir)) {

@@ -9,6 +9,8 @@ public strictfp class RobotPlayer {
     public static RobotType rt;
     public static Team myTeam;
     public static float bodyRadius, strideRadius;
+    public static RobotInfo[] nearbyTeammates;
+    public static int numNearby;
 
     /**
      * run() is the method that is called when a robot is instantiated in the Battlecode world.
@@ -61,14 +63,26 @@ public strictfp class RobotPlayer {
         }
 	}
     static void archonRun(){
+    	MapLocation center;
     	while(true){
     		try{
     			BulletDodge.dodge();
-            	Move.tryMove(Move.randomDirection());
-            	Donations.ifReady(50,200);
-            	if(rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.getRoundNum()%10==0){
-            		buildGardener();
+    			nearbyTeammates = rc.senseNearbyRobots(3, myTeam);
+    			numNearby = nearbyTeammates.length;
+            	if(numNearby == 0){
+            		if(rc.hasRobotBuildRequirements(RobotType.GARDENER) && rc.getRoundNum()%10==0){
+                		buildGardener();
+                	}
+            		Move.tryMove(Move.randomDirection(),3,10);
             	}
+            	else{
+            		nearbyTeammates = rc.senseNearbyRobots(5, myTeam);
+        			numNearby = nearbyTeammates.length;
+            		center = findCenterNearbyTeam();
+            		Move.tryMove(new Direction(center,rc.getLocation()),3,15);
+            	}
+            	Donations.ifReady(100,200);
+            	
             	Clock.yield();
     		}catch(Exception e){
     			System.out.println(e);
@@ -91,7 +105,7 @@ public strictfp class RobotPlayer {
     		try{
 		    	tryWater();
 		    	BulletDodge.dodge();
-		    	Donations.ifReady(50,200);
+		    	Donations.ifReady(100,200);
 		    	tryWater();
 		    	tryPlant();
 		    	tryWater();
@@ -101,6 +115,16 @@ public strictfp class RobotPlayer {
     			e.printStackTrace();
     		}
     	}
+    }
+    
+    static MapLocation findCenterNearbyTeam(){
+		if(numNearby == 1){return nearbyTeammates[0].location;}
+    	float xsum = 0,ysum = 0;
+    	for(RobotInfo ri : nearbyTeammates){
+    		xsum += ri.location.x;
+    		ysum += ri.location.y;
+    	}
+    	return new MapLocation(xsum/numNearby,ysum/numNearby);
     }
     
     static boolean tryPlant() throws GameActionException{
