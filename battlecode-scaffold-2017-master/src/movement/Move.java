@@ -1,6 +1,7 @@
 package movement;
 
 import battlecode.common.*;
+import vectormath.LineMath;
 
 public strictfp class Move {
 	public static RobotController rc;
@@ -33,8 +34,10 @@ public strictfp class Move {
 	 * @return success or failure
 	 */
 	public static boolean tryMove(Direction direction) throws GameActionException{
-		if(rc.hasMoved()){return false;}
 		return tryMove(direction, 10,5);
+	}
+	public static boolean tryMove(LineMath.Vector vec) throws GameActionException{
+		return tryMove(vec.direction());
 	}
 	
 	static boolean tryMove(Direction dir, float degreeOffset, int checksPerSide) throws GameActionException {

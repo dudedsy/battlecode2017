@@ -7,7 +7,7 @@ import movement.Move;
 public class Gardener{
 	private static RobotController rc;
 	static RobotType rt;
-	static final RobotType[] buildList = {RobotType.SCOUT,RobotType.LUMBERJACK,RobotType.LUMBERJACK,RobotType.TANK};
+	static final RobotType[] buildList = {RobotType.SCOUT,RobotType.LUMBERJACK,RobotType.SOLDIER,RobotType.LUMBERJACK,RobotType.TANK};
 	static int buildNum;
 	static float bodyRadius;
 	static float strideRadius;

@@ -1,5 +1,7 @@
 package movement;
 
+import java.util.Arrays;
+
 import battlecode.common.*;
 import vectormath.LineMath;
 
@@ -23,6 +25,45 @@ public strictfp class BulletDodge {
 		rt = rc.getType();
 		bodyRadius = rt.bodyRadius;
 		strideRadius = rt.strideRadius;
+	}
+	
+	
+	/**
+	 * checks for incoming bullets and dogdes as safely as possible
+	 * no move if no incoming... move in another function if you want
+	 * 
+	 * @return true if we moved to dodge, false otherwise.
+	 */
+	public static boolean dodge() throws GameActionException{
+		BulletPath[] danger = incoming(true);
+		int dangerLen = danger.length;
+		if(dangerLen == 0){return false;}
+		if(dangerLen == 1){
+			return Move.tryMove(danger[0].perpendicular);
+		}
+		sortPaths(danger);
+		//TODO: make this account for more than one nearby path...
+		return Move.tryMove(danger[0].perpendicular);
+	}
+	
+	/**
+	 * move towards the supplied location,
+	 * dodging bullets as necessary
+	 * 
+	 * @param destination location
+	 */
+	public static void dodgeTowards(MapLocation loc){
+		
+	}
+	
+	/**
+	 * move towards the destination direction
+	 * dodging bullets at necessary
+	 * 
+	 * @param desired movement direction
+	 */
+	public static void dodgeTowards(Direction dir){
+		
 	}
 	
 	/**
@@ -52,7 +93,7 @@ public strictfp class BulletDodge {
 	 * @return true if a bullet will hit the current robot location next round . false otherwise.
 	 */
 	public static BulletPath[] incoming(boolean scanfirst){
-		bulletScan(); //use scanbullets to integrate comms
+		if(scanfirst){bulletScan();}
 		return incoming();
 	}
 	/**
@@ -86,7 +127,7 @@ public strictfp class BulletDodge {
 
         float safeRadius = rt.bodyRadius+rt.strideRadius;
         BulletPath bulletPath;
-        LineMath.Vector startToRobot,finishToRobot;
+        LineMath.Vector startToRobot;
         
 		for(int i = 0;i<bullets.length;i++){
 			// Get relevant bullet information
@@ -97,21 +138,59 @@ public strictfp class BulletDodge {
 	        startToRobot = new LineMath.Vector(bullet.location,myLocation);
 	        bulletPath = new BulletPath(bullet);
 	        
-	        // If bullet doesn't pass close enough for us to get in danger, ignore it.
-	        bulletPath.perpDist = LineMath.dot(startToRobot,bulletPath.perpendicular);
-	        if(Math.abs(bulletPath.perpDist)>safeRadius){continue;}
+	        //if we're safely behind the bullet, ignore it
+	        bulletPath.startDist = LineMath.dot(startToRobot,bulletPath.parallel);
+	        if(bulletPath.startDist < -safeRadius){continue;}
 	        
-	        //TODO: account for start 
-	        //TODO: account for endpoint
-	        //TODO:account for trees?
+	        // We'll ignore it if we're walking in front only if we have two turns to get out of the way
+	        if(bulletPath.startDist > safeRadius+2*bullet.speed){continue;}
+	        
+	        
+	        // rearange normal vector and distance so distance is always positive and normal
+	        // vector always points away from the line
+	        bulletPath.perpDist = LineMath.dot(startToRobot,bulletPath.perpendicular);
+	        if(bulletPath.perpDist < 0){
+	        	bulletPath.perpDist = -bulletPath.perpDist;
+	        	bulletPath.perpendicular.reverse();
+	        }
+	        // If bullet doesn't pass close enough for us to get in danger, ignore it.
+	        if(bulletPath.perpDist>safeRadius){continue;}
+
+	        //TODO: account for trees?
 
 	        //if we made it this far, add it to the danger list
-	        //then iff we've filled the list we can just break out... fuck it
+	        //then if we've filled the list we can just break out... fuck it
 	        danger[dcount++] = bulletPath;
-	        if(dcount>MAXBULLETPATHS){break;}
+	        if(dcount>=MAXBULLETPATHS){break;}
 		}
-		return danger;
+		return Arrays.copyOf(danger,dcount);
 	}
+	/**
+	 * Sorts the list in place. Insertion sort by perpendicular distance
+	 * hopefully this is relatively efficient for the (hopefully) short lists we should be getting here.
+	 * 
+	 * @param list to sort (will sort by perp dist)
+	 * @return sorted list (list has been sorted in place, but sometimes this is convenient)
+	 */
+	static BulletPath[] sortPaths(BulletPath[] paths){
+		int len = paths.length;
+		BulletPath x;
+		int j;
+		float perpDist;
+		for(int i = 1; i < len; i++){
+			x = paths[i];
+			if(x==null){break;}
+			perpDist = x.perpDist;
+			j = i-1;
+			while(j>=0 && paths[j].perpDist > perpDist){
+				paths[j+1]=paths[j];
+				j--;
+			}
+			paths[j+1]=x;
+		}
+		return paths;
+	}
+	
 	/**
 	 * bulletPath represents the path a bullet will take
 	 * and stores the perpendicular unit vector from the bullet path.
@@ -134,7 +213,6 @@ public strictfp class BulletDodge {
 		public float speed, damage;
 		public int ID;
 		public float perpDist;
-		public float endDist;
 		public float startDist;
 		
 		public BulletPath(BulletInfo bullet){

@@ -96,13 +96,23 @@ public class LineMath{
 		public Vector scalarMult(float scalar){
 			return new Vector(this.dx*scalar,this.dy*scalar);
 		}
+		public Direction direction(){
+			return new Direction(dx,dy);
+		}
 	}
 	public static class UnitVector extends Vector{
 		public static UnitVector perpUnit(UnitVector v){
-			UnitVector retval = new UnitVector();
-			retval.dx = v.dy;
-			retval.dy = -v.dx;
-			return retval;
+			return new UnitVector(v.dy,-v.dx);
+		}
+		public UnitVector perpUnit(){
+			return new UnitVector(this.dy,-this.dx);
+		}
+		public UnitVector opposite(){
+			return new UnitVector(-this.dx,-this.dy);
+		}
+		public void reverse(){
+			this.dx = -this.dx;
+			this.dy = -this.dy;
 		}
 		
 		public UnitVector(Line A){
